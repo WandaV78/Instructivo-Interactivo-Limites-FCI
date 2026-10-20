@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  PROPIEDAD INTELECTUAL - DOCUMENTO PRIVADO
+  ============================================================================
+  Titulo      : Configurador y Control de Límites - AppFondos
+  Autora      : WCV
+  Email       : wandacvaca@gmail.com
+  Copyright   : (c) 2026 WCV - Todos los derechos reservados.
+  Uso         : Documento de uso interno y material de soporte tecnico.
+  ============================================================================
+  Este archivo es de autoria y propiedad exclusiva de WCV.
+  Su reproduccion, distribucion, modificacion o publicacion, total o parcial,
+  requiere autorizacion previa y escrita de la autora.
+  ============================================================================
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="WCV">
+  <meta name="copyright" content="Copyright (c)">
+  <meta name="owner" content="WCV >
+  <meta name="description" content="Instructivo Interactivo de Configuración de Límites según Reglamento de Gestión - AppFondos. Propiedad de WCV.">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow">
+  <title>Configurador y Control de Límites - AppFondos | © 2026 WCV</title>
+  
+  <!-- PDF.js para lectura de documentos -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --win-header: #1e3a8a;
+      --win-body: #f8fafc;
+      --primary: #0e7490;
+      --primary-light: #38bdf8;
+      --accent: #2563eb;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --white: #ffffff;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { margin: 0; background-color: var(--bg-dark); color: var(--text); padding: 20px; font-size: 13px; }
+    .app-container { max-width: 1400px; margin: 0 auto; position: relative; }
+
+    header {
+      background: var(--panel-bg);
+      padding: 16px 24px;
+      border-radius: 8px 8px 0 0;
+      border-bottom: 2px solid var(--primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { margin: 0; font-size: 19px; color: var(--white); font-weight: 700; }
+    header .sub { font-size: 12px; color: #94a3b8; margin-top: 3px; }
+
+    /* Barra Superior de Carga */
+    .upload-zone {
+      background: #334155;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid #475569;
+      flex-wrap: wrap;
+    }
+    .upload-box {
+      border: 2px dashed var(--primary-light);
+      padding: 10px 20px;
+      border-radius: 6px;
+      background: rgba(14, 116, 144, 0.2);
+      cursor: pointer;
+      color: var(--white);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .upload-box:hover { background: rgba(14, 116, 144, 0.4); border-color: var(--white); }
+    .btn-manual-paste {
+      background: transparent;
+      border: 1px solid #94a3b8;
+      color: #cbd5e1;
+      padding: 9px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-manual-paste:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+    .file-status { color: #cbd5e1; font-size: 12px; flex: 1; }
+
+    /* Overlay de Carga (Oculto estrictamente por defecto) */
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.85);
+      display: none; /* Asegurado oculto */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 5px solid rgba(56, 189, 248, 0.2);
+      border-top-color: var(--primary-light);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 18px; color: var(--white); font-size: 15px; font-weight: 600; }
+    .loading-subtext { color: #94a3b8; font-size: 12px; margin-top: 6px; }
+
+    /* Layout principal */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      background: #e2e8f0;
+      padding: 16px;
+      border-radius: 0 0 8px 8px;
+      min-height: 720px;
+    }
+
+    /* Barra lateral */
+    .sidebar { background: var(--white); border-radius: 6px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+    .sidebar h3 { font-size: 12px; text-transform: uppercase; color: var(--primary); margin: 6px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px; letter-spacing: 0.5px; }
+    .step-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      transition: all 0.2s;
+    }
+    .step-btn:hover { background: #f1f5f9; border-color: var(--primary); }
+    .step-btn.active { background: var(--primary); color: var(--white); border-color: var(--primary); }
+    .step-btn.disabled { opacity: 0.45; pointer-events: none; }
+    .step-btn small { display: block; font-weight: normal; font-size: 10.5px; opacity: 0.85; margin-top: 2px; }
+
+    /* Espacio de trabajo */
+    .workspace { background: var(--white); border-radius: 6px; border: 1px solid var(--border); padding: 16px; position: relative; overflow-y: auto; }
+    .doc-callout {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #166534;
+      line-height: 1.5;
+    }
+    .doc-callout strong { color: #14532d; }
+
+    /* Estado Inicial / Vacío */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 540px;
+      text-align: center;
+      color: var(--text-muted);
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 24px;
+      background: #f8fafc;
+    }
+    .empty-state-icon { font-size: 54px; margin-bottom: 14px; }
+    .empty-state h2 { font-size: 18px; color: var(--text); margin: 0 0 8px 0; }
+    .empty-state p { font-size: 13px; max-width: 540px; line-height: 1.5; margin: 0 0 20px 0; }
+
+    /* Ventana del sistema AppFondos */
+    .window-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--win-body);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+    .window-header {
+      background: var(--win-header);
+      color: var(--white);
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .win-dots span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 5px; }
+    .dot-r { background: var(--danger); }
+    .dot-y { background: var(--warning); }
+    .dot-g { background: var(--success); }
+    .window-body { padding: 16px; }
+
+    /* Tablas y Formularios */
+    table { width: 100%; border-collapse: collapse; font-size: 11.5px; background: var(--white); margin-top: 8px; }
+    th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+    th { background: #e2e8f0; font-weight: bold; color: #1e293b; }
+    tr:nth-child(even) { background-color: #f8fafc; }
+    
+    .form-row { display: grid; grid-template-columns: 220px 1fr; gap: 12px; margin-bottom: 10px; align-items: center; }
+    .form-row label { font-weight: bold; color: #475569; font-size: 12px; }
+    .form-row input, .form-row select, .form-row textarea { padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; width: 100%; max-width: 480px; }
+    .form-row input[disabled] { background-color: #f1f5f9; color: #334155; font-weight: 600; }
+
+    .btn-action { background: var(--primary); color: var(--white); border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+    .btn-action:hover { background: #0891b2; }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 10.5px; }
+    .badge-ok { background: #dcfce7; color: #15803d; }
+    .badge-data { background: #fef9c3; color: #854d0e; }
+
+    /* Modal de Alerta de Mesa On-Line */
+    .modal-alert {
+      position: absolute;
+      top: 90px; left: 50%;
+      transform: translateX(-50%);
+      width: 520px;
+      background: var(--white);
+      border: 2px solid var(--danger);
+      border-radius: 8px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      z-index: 10001;
+      overflow: hidden;
+      display: none;
+    }
+    .modal-alert-header { background: var(--danger); color: var(--white); padding: 10px 14px; font-size: 12px; font-weight: bold; }
+    .modal-alert-body { padding: 16px; font-size: 12px; }
+
+    /* ============================================================
+       MARCA DE PROPIEDAD - WCV
+       Identifica a la autora/propietaria del documento.
+       ============================================================ */
+    .owner-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(56, 189, 248, 0.10);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 6px;
+      padding: 8px 14px;
+      flex-shrink: 0;
+    }
+    .owner-badge .owner-icon { font-size: 17px; line-height: 1; }
+    .owner-badge .owner-text { display: flex; flex-direction: column; line-height: 1.35; }
+    .owner-badge .owner-label {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+      color: #7dd3fc;
+      font-weight: 700;
+    }
+    .owner-badge .owner-name {
+      font-size: 12.5px;
+      color: var(--white);
+      font-weight: 700;
+    }
+    .owner-badge .owner-name span { color: var(--primary-light); }
+
+    /* Marca de agua diagonal (superpuesta, no interactiva, no bloquea clicks) 
+    .ownership-watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-28deg);
+      font-size: clamp(28px, 6vw, 72px);
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: rgba(56, 189, 248, 0.22);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+      z-index: 9998;
+    }
+    .app-container > * { position: relative; z-index: 1; }*/
+
+    /* Footer de propiedad */
+    .ownership-footer {
+      margin-top: 16px;
+      background: var(--panel-bg);
+      border-top: 2px solid var(--primary);
+      border-radius: 0 0 8px 8px;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .ownership-footer .footer-left { display: flex; flex-direction: column; gap: 3px; }
+    .ownership-footer .footer-copy {
+      font-size: 12px;
+      color: var(--white);
+      font-weight: 600;
+    }
+    .ownership-footer .footer-copy .brand { color: var(--primary-light); }
+    .ownership-footer .footer-note {
+      font-size: 10.5px;
+      color: #94a3b8;
+    }
+    .ownership-footer .footer-id {
+      font-size: 10px;
+      color: #64748b;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      padding: 4px 9px;
+      font-family: "Consolas", "Courier New", monospace;
+      letter-spacing: 0.4px;
+    }
+
+    /* Ajuste responsive de los elementos de propiedad */
+    @media (max-width: 640px) {
+      header { flex-wrap: wrap; gap: 10px; }
+      .owner-badge { flex: 1 1 auto; justify-content: center; }
+      .ownership-footer { padding: 12px 16px; gap: 10px; }
+      .ownership-footer .footer-copy { font-size: 11px; }
+      .ownership-footer .footer-note { font-size: 9.5px; }
+      .ownership-watermark { font-size: clamp(20px, 8vw, 40px); letter-spacing: 3px; }
+    }
+
+    @media print {
+      .ownership-watermark { display: none; }
+      .owner-badge, .ownership-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- MARCA DE AGUA - WCV (propiedad del documento) -->
+<div class="ownership-watermark" aria-hidden="true">WCV</div>
+
+<!-- INDICADOR DE PROCESAMIENTO (SPINNER CONTEXTUAL) -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingTitle">Procesando Reglamento...</div>
+  <div class="loading-subtext" id="loadingProgress">Analizando estructura de cláusulas</div>
+</div>
+
+<div class="app-container">
+  <header>
+    <div>
+      <h1>• AppFONDOS</h1>
+      <div class="sub">Instructivo Interactivo de Configuración de Límites según Reglamento de Gestión</div>
+    </div>
+    <!-- MARCA DE PROPIEDAD: identifica a la autora/propietaria del documento -->
+    <div class="owner-badge" title="Documento de propiedad de WCV">
+      <span class="owner-icon">🔒</span>
+      <span class="owner-text">
+        <span class="owner-label">Propiedad de</span>
+        <span class="owner-name">W <span>CV </span>
+      </span>
+    </div>
+  </header>
+
+  <!-- BARRA DE CARGA -->
+  <div class="upload-zone">
+    <label class="upload-box" for="pdfFileInput">
+      <span>📄 Seleccionar Reglamento en PDF</span>
+      <input type="file" id="pdfFileInput" accept="application/pdf" style="display:none;" onchange="handlePDFUpload(this)">
+    </label>
+    <button class="btn-manual-paste" onclick="openManualInputModal()">📝 Pegar Texto del Reglamento</button>
+    <div class="file-status" id="fileUploadStatus">
+      Sube el archivo PDF de cualquier Fondo Común de Inversión (Money Market, Renta Fija o Mixto) para generar automáticamente el instructivo y la matriz de control.
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- PANEL LATERAL DE PASOS -->
+    <div class="sidebar">
+      <h3>Pasos de Parametrización</h3>
+      <button class="step-btn disabled" id="btnStep1" onclick="setStep(1)">
+        1. Ficha Técnica & Cabecera
+        <small>Tablas > Fondos > Características</small>
+      </button>
+      <button class="step-btn disabled" id="btnStep2" onclick="setStep(2)">
+        2. Matriz de Límites del Fondo
+        <small>Mapeo normativo a AppFondos</small>
+      </button>
+      <button class="step-btn disabled" id="btnStep3" onclick="setStep(3)">
+        3. Cuentas y Sociedad Depositaria
+        <small>Inversiones > Cuentas Bancarias</small>
+      </button>
+      <button class="step-btn disabled" id="btnStep4" onclick="setStep(4)">
+        4. Activación de Tipos de Límite
+        <small>Límites > Definición > Tipos de Límite</small>
+      </button>
+      <button class="step-btn disabled" id="btnStep5" onclick="setStep(5)">
+        5. Configuración por Fondo
+        <small>Límites > Configuración de Límites</small>
+      </button>
+      <button class="step-btn disabled" id="btnStep6" onclick="setStep(6)">
+        6. Límites por Grupos Bancarios
+        <small>Control consolidado y por Banco</small>
+      </button>
+      <button class="step-btn disabled" id="btnStep7" onclick="setStep(7)">
+        7. Simulación de Mesa (On-Line)
+        <small>Disparo de advertencia preventiva</small>
+      </button>
+      <button class="step-btn disabled" id="btnStep8" onclick="setStep(8)">
+        8. Control Batch Diario (Semáforo)
+        <small>Límites > Control de Límites</small>
+      </button>
+    </div>
+
+    <!-- ÁREA DE CONTENIDO -->
+    <div class="workspace" id="workspacePanel">
+      <!-- Se inyecta dinámicamente -->
+    </div>
+  </div>
+
+  <!-- FOOTER DE PROPIEDAD -->
+  <footer class="ownership-footer">
+    <div class="footer-left">
+      <div class="footer-copy">© 2026 <span class="brand"></span> — Todos los derechos reservados</div>
+      <div class="footer-note"> · Uso interno · Documento de autoría y propiedad exclusiva del autor</div>
+    </div>
+    <div class="footer-id">Propiedad de: WCV</div>
+  </footer>
+</div>
+
+<!-- MODAL PARA PEGAR TEXTO DE RESPALDO (SI EL PDF ES IMAGEN O TIENE ERROR DE LECTURA) -->
+<div class="modal-alert" id="manualTextModal" style="width: 600px;">
+  <div class="modal-alert-header" style="background:var(--win-header);">
+    <span>Pegar Texto o Cláusulas del Reglamento de Gestión</span>
+  </div>
+  <div class="modal-alert-body">
+    <p style="margin-top:0;">Si tu PDF está protegido o no tiene texto digital, pega las cláusulas de inversión aquí:</p>
+    <textarea id="rawTextPaste" rows="10" style="width:100%; border:1px solid var(--border); border-radius:4px; font-size:12px; padding:8px;" placeholder="Pega el texto del reglamento aquí (Capítulo 1, Capítulo 2: Objetivos y Política de Inversión)..."></textarea>
+    <div style="margin-top:12px; display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn-action" style="background:#64748b;" onclick="document.getElementById('manualTextModal').style.display='none'">Cancelar</button>
+      <button class="btn-action" onclick="processPastedText()">Procesar Texto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  // ESTADO LIMPIO: Nulo al inicio (sin valores ficticios ni precargados)
+  let fciData = null;
+  let currentStep = 1;
+
+  function showLoading(title, progress) {
+    document.getElementById("loadingTitle").innerText = title;
+    document.getElementById("loadingProgress").innerText = progress;
+    document.getElementById("loadingOverlay").style.display = "flex";
+  }
+
+  function updateLoadingProgress(progress) {
+    document.getElementById("loadingProgress").innerText = progress;
+  }
+
+  function hideLoading() {
+    document.getElementById("loadingOverlay").style.display = "none";
+  }
+
+  function openManualInputModal() {
+    document.getElementById("manualTextModal").style.display = "block";
+  }
+
+  function processPastedText() {
+    const text = document.getElementById("rawTextPaste").value;
+    if (!text.trim()) {
+      alert("Por favor ingresa texto para procesar.");
+      return;
+    }
+    document.getElementById("manualTextModal").style.display = "none";
+    showLoading("Procesando Texto Ingresado", "Analizando cláusulas normativas...");
+    setTimeout(() => {
+      initAndParse(text, "Texto Ingresado Manualmente");
+      hideLoading();
+    }, 300);
+  }
+
+  // PROCESAMIENTO DEL ARCHIVO PDF
+  async function handlePDFUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const statusDiv = document.getElementById("fileUploadStatus");
+    showLoading(`Leyendo: ${file.name}`, "Cargando documento en el motor PDF...");
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        updateLoadingProgress(`Extrayendo texto de página ${i} de ${pdf.numPages}...`);
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        fullText += pageText + "\n";
+      }
+
+      if (fullText.trim().length < 60) {
+        throw new Error("El PDF no contiene texto legible (posiblemente sea una imagen escaneada sin OCR). Puedes usar el botón 'Pegar Texto del Reglamento' para procesarlo.");
+      }
+
+      updateLoadingProgress("Mapeando parámetros contra el manual de AppFondos...");
+      initAndParse(fullText, file.name);
+
+      statusDiv.innerHTML = `✅ <strong>${file.name}</strong> procesado con éxito. Parámetros listos para: <strong>${fciData.nombre}</strong>.`;
+
+    } catch (error) {
+      console.error(error);
+      statusDiv.innerHTML = `❌ <span style="color:var(--danger)">${error.message}</span>`;
+      alert(error.message);
+    } finally {
+      hideLoading();
+      input.value = ""; // Limpiar input para permitir recargas sucesivas
+    }
+  }
+
+  function initAndParse(rawText, sourceName) {
+    // Inicializar estructura limpia
+    fciData = {
+      nombre: "",
+      numeroCNV: "S/N",
+      resolucion: "EN TRÁMITE / NO INFORMADA",
+      socGerente: "NO IDENTIFICADA",
+      socDepositaria: "NO IDENTIFICADA",
+      tipoFondo: "Renta Fija",
+      moneda: "Pesos Argentinos (ARS)",
+      decimalesVCP: "4 Decimales",
+      plazoRescate: "2 Días Hábiles (T+2)",
+      margenLiquidezMin: 0,
+      devengamientoMax: 100,
+      plazosFijosMax: 100,
+      vencimientoMaximoDias: 365,
+      vidaPromedioMaxDias: 365,
+      titulosDeudaMercadoMax: 100,
+      operacionesPasesMax: 20,
+      fuenteTexto: sourceName
+    };
+
+    parseReglamentoText(rawText, sourceName);
+
+    // Habilitar navegación lateral
+    for (let s = 1; s <= 8; s++) {
+      document.getElementById(`btnStep${s}`).classList.remove("disabled");
+    }
+
+    setStep(1);
+  }
+
+  // MOTOR DE EXTRACCIÓN REGEX
+  function parseReglamentoText(rawText, filename) {
+    const text = rawText.replace(/\s+/g, ' ');
+
+    // 1. Nombre del Fondo
+    const fciMatch = text.match(/"([^"]*FONDO COMÚN DE INVERSIÓN[^"]*)"/i) 
+      || text.match(/denominado\s+"([^"]+)"/i) 
+      || text.match(/([A-ZÁÉÍÓÚÑ\s]+(?:MONEY MARKET|RENTA FIJA|RENTA VARIABLE|RETORNO TOTAL|AHORRO|ESTRATEGIA)\s+FONDO COMÚN DE INVERSIÓN)/i);
+    if (fciMatch) {
+      fciData.nombre = fciMatch[1].trim().replace(/^"|"$/g, '');
+    } else {
+      fciData.nombre = filename.replace(/\.[^/.]+$/, "").toUpperCase();
+    }
+
+    // 2. Registro CNV
+    const regMatch = text.match(/(?:registrado bajo el|Fondo registrado bajo el|FCI N°|FCI Nº)\s*(?:Nro\.?|N°|Nº)?\s*([0-9]+)/i);
+    if (regMatch) fciData.numeroCNV = regMatch[1];
+
+    // 3. Resolución CNV
+    const resMatch = text.match(/Resolución\s*(?:Nro\.?|N°|Nº)?\s*([A-Z0-9\-#]+)/i);
+    if (resMatch) fciData.resolucion = resMatch[1];
+
+    // 4. Sociedad Gerente
+    const gerMatch = text.match(/GERENTE[^:]*:\s*la GERENTE del FCI es\s+([A-ZÁÉÍÓÚÑ\s\.\,]+?(?:S\.A\.U?|S\.A\.|SOCIEDAD ANÓNIMA))/i);
+    if (gerMatch) {
+      fciData.socGerente = gerMatch[1].split(',')[0].trim();
+    }
+
+    // 5. Sociedad Depositaria
+    const depMatch = text.match(/DEPOSITARIA[^:]*:\s*la DEPOSITARIA del FCI es\s+([A-ZÁÉÍÓÚÑ\s\.\,]+?(?:S\.A\.U?|S\.A\.|BANCO[A-ZÁÉÍÓÚÑ\s\.]+))/i);
+    if (depMatch) {
+      fciData.socDepositaria = depMatch[1].split(',')[0].trim();
+    }
+
+    // 6. Tipología de Fondo según Manual  (Sección 4.6.1)
+    if (/Money Market|mercado de dinero|dinero clásico/i.test(text)) {
+      fciData.tipoFondo = "Money Markets";
+      fciData.plazoRescate = "0 Días (Inmediato / T+0)";
+    } else if (/renta variable|acciones/i.test(text)) {
+      fciData.tipoFondo = "Renta Variable";
+      fciData.plazoRescate = "2 Días Hábiles (T+2)";
+    } else if (/plazos fijos/i.test(text)) {
+      fciData.tipoFondo = "Plazos Fijos";
+      fciData.plazoRescate = "1 Día Hábil (T+1)";
+    } else if (/mixto/i.test(text)) {
+      fciData.tipoFondo = "Mixtos";
+      fciData.plazoRescate = "2 Días Hábiles (T+2)";
+    } else {
+      fciData.tipoFondo = "Renta Fija";
+      fciData.plazoRescate = "2 Días Hábiles (T+2)";
+    }
+
+    // 7. Margen de Liquidez
+    const liqMatch = text.match(/margen de liquidez[^\%]+?([0-9]{1,2})\s*%/i)
+      || text.match(/margen de liquidez[^\%]+?(?:no menos del|al menos el)\s+([A-ZÁÉÍÓÚÑ\s]+)?\(?([0-9]+)\s*\%\)?/i);
+    if (liqMatch) {
+      fciData.margenLiquidezMin = parseInt(liqMatch[2] || liqMatch[1]);
+    }
+
+    // 8. Activos valuados a devengamiento
+    const devMatch = text.match(/porcentaje máximo del\s+([A-ZÁÉÍÓÚÑ\s]+)?\(?([0-9]+)\s*\%\)?\s*de ACTIVOS AUTORIZADOS valuados a devengamiento/i)
+      || text.match(/valuados a devengamiento[^\%]+?([0-9]{1,2})\s*%/i);
+    if (devMatch) {
+      fciData.devengamientoMax = parseInt(devMatch[2] || devMatch[1]);
+    }
+
+    // 9. Plazos fijos no precancelables
+    const pfMatch = text.match(/plazos fijos no precancelables[^\%]+?([0-9]{1,2})\s*%/i)
+      || text.match(/plazos fijos no precancelables[^\%]+?hasta un\s+([A-ZÁÉÍÓÚÑ\s]+)?\(?([0-9]+)\s*\%\)?/i);
+    if (pfMatch) {
+      fciData.plazosFijosMax = parseInt(pfMatch[2] || pfMatch[1]);
+    }
+
+    // 10. Vencimiento final residual
+    const vtoMatch = text.match(/vencimiento final[^\.]*?no exceda de\s*(?:los)?\s*([A-ZÁÉÍÓÚÑ\s]+)?\(?([0-9]+)\)?\s*días/i)
+      || text.match(/vencimiento final[^\.]*?([0-9]+)\s*días/i);
+    if (vtoMatch) {
+      fciData.vencimientoMaximoDias = parseInt(vtoMatch[2] || vtoMatch[1]);
+    }
+
+    // 11. Vida promedio ponderada (VPP)
+    const vppMatch = text.match(/vida promedio ponderada[^\.]*?no podrá exceder de\s*([A-ZÁÉÍÓÚÑ\s]+)?\(?([0-9]+)\)?\s*días/i)
+      || text.match(/vida promedio ponderada[^\.]*?([0-9]+)\s*días/i);
+    if (vppMatch) {
+      fciData.vidaPromedioMaxDias = parseInt(vppMatch[2] || vppMatch[1]);
+    }
+
+    // 12. Decimales VCP
+    const decMatch = text.match(/expresándose su valor con\s+([0-9]+)\s+decimales/i);
+    if (decMatch) {
+      fciData.decimalesVCP = `${decMatch[1]} Decimales`;
+    }
+  }
+
+  // RENDERIZADO DE PASOS
+  function setStep(step) {
+    currentStep = step;
+
+    // Si aún no se cargó ningún reglamento, mostrar estado de bienvenida limpio
+    if (!fciData) {
+      document.getElementById("workspacePanel").innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📂</div>
+          <h2>Ningún Reglamento de Gestión Activo</h2>
+          <p>Para construir el circuito y configurar AppFondos, selecciona un archivo <strong>PDF</strong> en la barra superior o utiliza la opción de pegar texto.</p>
+          <label class="btn-action" for="pdfFileInput" style="cursor:pointer;">
+            Seleccionar PDF del Fondo
+          </label>
+        </div>`;
+      return;
+    }
+
+    document.querySelectorAll('.sidebar .step-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx === step - 1);
+    });
+
+    const panel = document.getElementById("workspacePanel");
+
+    switch (step) {
+      case 1:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 1: Cabecera y Parámetros Estructurales en AppFondos</strong><br>
+            Origen: <em>${fciData.fuenteTexto}</em>.<br>
+            Ruta en el sistema: <em>Tablas > Fondos > Características de los Fondos</em> (Manual , Sección 4.6.1).
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ Tablas > Fondos > Características de los Fondos [Modificar Fondo: ${fciData.numeroCNV}]</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <div class="form-row"><label>Nombre del Fondo:</label><input type="text" value="${fciData.nombre}" disabled></div>
+              <div class="form-row"><label>Registro CNV / Resolución:</label><input type="text" value="${fciData.numeroCNV} (Res. ${fciData.resolucion})" disabled></div>
+              <div class="form-row"><label>Sociedad Gerente:</label><input type="text" value="${fciData.socGerente}" disabled></div>
+              <div class="form-row"><label>Sociedad Depositaria:</label><input type="text" value="${fciData.socDepositaria}" disabled></div>
+              <div class="form-row"><label>Tipo de Fondo:</label><input type="text" value="${fciData.tipoFondo}" disabled></div>
+              <div class="form-row"><label>Moneda de Origen:</label><input type="text" value="${fciData.moneda}" disabled></div>
+              <div class="form-row"><label>Decimales de Cuotaparte:</label><input type="text" value="${fciData.decimalesVCP}" disabled></div>
+              <div class="form-row"><label>Plazo Rescate Sugerido:</label><input type="text" value="${fciData.plazoRescate}" disabled></div>
+            </div>
+          </div>`;
+        break;
+
+      case 2:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 2: Matriz de Límites del Reglamento Activo</strong><br>
+            Equivalencia normativa mapeada directamente a los tipos de límite de AppFondos (Manual , Sección 12.1.2).
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ Matriz de Equivalencias de Control de Inversiones (Reglamento vs. AppFondos)</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Límite en AppFondos</th>
+                    <th>Condición / Operador</th>
+                    <th>Valor Extraído</th>
+                    <th>Base de Cálculo</th>
+                    <th>Estado de Exigencia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Margen de Liquidez</strong></td>
+                    <td>Mayor o Igual (&gt;=)</td>
+                    <td><strong style="color:var(--primary); font-size:13px;">${fciData.margenLiquidezMin}.00 %</strong></td>
+                    <td>% s/ Activos a Devengamiento</td>
+                    <td>${fciData.margenLiquidezMin > 0 ? '<span class="badge badge-ok">PISO EXIGIDO</span>' : '<span class="badge badge-data">NO APLICA (0%)</span>'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Activos Valuados a Devengamiento</strong></td>
+                    <td>Menor o Igual (&lt;=)</td>
+                    <td><strong>${fciData.devengamientoMax}.00 %</strong></td>
+                    <td>% s/ Patrimonio Neto</td>
+                    <td>Tope según política de cartera</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Plazos Fijos no Precancelables</strong></td>
+                    <td>Menor o Igual (&lt;=)</td>
+                    <td><strong>${fciData.plazosFijosMax}.00 %</strong></td>
+                    <td>% s/ Patrimonio Neto</td>
+                    <td>Tope en colocaciones a plazo</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Sobre Vencimiento de Activos</strong></td>
+                    <td>Menor o Igual (&lt;=)</td>
+                    <td><strong style="color:var(--danger);">${fciData.vencimientoMaximoDias} Días</strong></td>
+                    <td>Días corridos residuales</td>
+                    <td>Plazo residual individual por activo</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Sobre Vida Promedio Ponderada</strong></td>
+                    <td>Menor o Igual (&lt;=)</td>
+                    <td><strong>${fciData.vidaPromedioMaxDias} Días</strong></td>
+                    <td>Días corridos ponderados</td>
+                    <td>Duración promedio de cartera</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Operaciones a Plazo en Depositaria</strong></td>
+                    <td>Igual (=)</td>
+                    <td><strong style="color:var(--danger)">0.00 % (Bloqueo)</strong></td>
+                    <td>Prohibición CNV</td>
+                    <td>Inhabilitada colocación en ${fciData.socDepositaria}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+        break;
+
+      case 3:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 3: Cuentas Bancarias de ${fciData.socDepositaria} y Flags de Liquidez</strong><br>
+            Ruta: <em>Inversiones > Cuentas Bancarias</em> (Manual , Sección 6.4.2). Su configuración correcta previene el estado <em>«Faltan Datos»</em>.
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ Inversiones > Cuentas Bancarias [Modificar Cuenta Fondo ${fciData.numeroCNV}]</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <div class="form-row"><label>Fondo:</label><input type="text" value="${fciData.numeroCNV} - ${fciData.nombre}" disabled></div>
+              <div class="form-row"><label>Banco Depositaria:</label><input type="text" value="${fciData.socDepositaria}" disabled></div>
+              <div class="form-row"><label>Es Cuenta en Depositaria:</label><div><input type="checkbox" checked disabled> <strong>SÍ</strong> (Activa el tope de cuentas a la vista y bloquea plazos fijos con ${fciData.socDepositaria})</div></div>
+              <div class="form-row"><label>Afecta Margen de Liquidez:</label><div><input type="checkbox" checked disabled> <strong>SÍ</strong> (El saldo a la vista computa en la fórmula de liquidez)</div></div>
+              <div class="form-row"><label>Afecta Liquidez Corriente:</label><div><input type="checkbox" checked disabled> <strong>SÍ</strong></div></div>
+              <div class="form-row"><label>Devengamiento Tipo:</label><input type="text" value="No Devenga Intereses (Disponible Inmediato)" disabled></div>
+            </div>
+          </div>`;
+        break;
+
+      case 4:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 4: Activación de Tipos de Límite y Control On-Line</strong><br>
+            Ruta: <em>Límites > Definición de Límites > Tipos de Límite</em> (Manual , Sección 12.1.1).
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ Límites > Definición de Límites > Tipos de Límite</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <table>
+                <thead>
+                  <tr><th>Descripción del Límite</th><th>Activo</th><th>Control On-Line</th><th>Efecto sobre el Fondo</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Margen de Liquidez</td><td><span class="badge badge-ok">SÍ</span></td><td><span class="badge badge-ok">SÍ</span></td><td>Valida piso del ${fciData.margenLiquidezMin}% antes de confirmar colocaciones</td></tr>
+                  <tr><td>Sobre Vencimiento de Activos</td><td><span class="badge badge-ok">SÍ</span></td><td><span class="badge badge-ok">SÍ</span></td><td>Bloquea plazos &gt; ${fciData.vencimientoMaximoDias} días</td></tr>
+                  <tr><td>Sobre Vida Promedio</td><td><span class="badge badge-ok">SÍ</span></td><td><span class="badge badge-data">NO</span></td><td>Control en proceso Batch diario (&lt;= ${fciData.vidaPromedioMaxDias} días)</td></tr>
+                  <tr><td>Activos Valuados a Devengamiento</td><td><span class="badge badge-ok">SÍ</span></td><td><span class="badge badge-ok">SÍ</span></td><td>Monitorea techo del ${fciData.devengamientoMax}% del PN</td></tr>
+                  <tr><td>Sobre Operaciones en Depositaria</td><td><span class="badge badge-ok">SÍ</span></td><td><span class="badge badge-ok">SÍ</span></td><td>Prohíbe colocaciones en ${fciData.socDepositaria}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+        break;
+
+      case 5:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 5: Configuración de Límites por Fondo</strong><br>
+            Ruta: <em>Límites > Definición de Límites > Configuración de Límites</em> (Manual , Sección 12.1.2).
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ AppFondos - Alta de Configuración de Límite por Fondo</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <div class="form-row"><label>Tipo de Límite:</label><input type="text" value="Margen de Liquidez [FCI_LIQ_01]" disabled></div>
+              <div class="form-row"><label>Tipo de Control:</label><input type="text" value="Mayor o Igual (>=) [Piso Obligatorio]" disabled></div>
+              <div class="form-row"><label>Porcentaje / Valor:</label><input type="text" value="${fciData.margenLiquidezMin}.00 %" style="font-weight:bold; color:var(--primary)" disabled></div>
+              <div class="form-row"><label>Fondo Seleccionado:</label><input type="text" value="${fciData.numeroCNV} - ${fciData.nombre}" disabled></div>
+              <button class="btn-action" onclick="alert('Parámetro grabado para ${fciData.nombre}.')">Confirmar Configuración</button>
+            </div>
+          </div>`;
+        break;
+
+      case 6:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 6: Configuración de Límites por Grupos de Entidades Financieras</strong><br>
+            Ruta: <em>Límites > Definición de Límites > Configuración de Límites por Grupos de Entidades Financieras</em> (Manual , Sección 12.1.3).
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ AppFondos - Control por Holding y Entidad Bancaria</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <div class="form-row"><label>Grupo Financiero:</label><input type="text" value="BANCOS AUTORIZADOS BCRA (CONSOLIDADO)" disabled></div>
+              
+              <div style="background:#fff; border:1px solid var(--border); padding:12px; border-radius:6px; margin: 10px 0;">
+                <strong style="color:var(--primary)">1. Sobre Inversiones del GRUPO:</strong><br>
+                <span>Condición: <strong>Menor o Igual (&lt;=)</strong> | Porcentaje: <strong>20.00 % del PN</strong> | Estado: <span class="badge badge-ok">ACTIVO</span></span>
+              </div>
+
+              <div style="background:#fff; border:1px solid var(--border); padding:12px; border-radius:6px; margin: 10px 0;">
+                <strong style="color:var(--primary)">2. Sobre Inversiones del BANCO (Individual):</strong><br>
+                <span>Condición: <strong>Menor o Igual (&lt;=)</strong> | Porcentaje: <strong>10.00 % del PN</strong> | Estado: <span class="badge badge-ok">ACTIVO</span></span>
+              </div>
+
+              <div style="background:#fef2f2; border:1px solid var(--danger); padding:12px; border-radius:6px; margin: 10px 0; color:#991b1b;">
+                <strong>3. Bloqueo de Depositaria (${fciData.socDepositaria}):</strong><br>
+                <span>Tope de Plazos Fijos y Cauciones = <strong>0.00%</strong> (Inhabilitada por CNV como contraparte de colocaciones a plazo del fondo).</span>
+              </div>
+            </div>
+          </div>`;
+        break;
+
+      case 7:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 7: Simulación Transaccional en Mesa (Control On-Line)</strong><br>
+            Ruta: <em>Inversiones > Operaciones Financieras > Plazos Fijos</em>. Simula una operación que quiebra el tope de ${fciData.vencimientoMaximoDias} días de este fondo.
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ Inversiones > Operaciones Financieras > Plazos Fijos [Alta de Boleto]</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <div class="form-row"><label>Fondo:</label><input type="text" value="${fciData.numeroCNV} - ${fciData.nombre}" disabled></div>
+              <div class="form-row"><label>Banco Contraparte:</label><input type="text" value="BANCO MACRO S.A." disabled></div>
+              <div class="form-row"><label>Plazo en Días:</label><input type="number" id="simDias" value="${fciData.vencimientoMaximoDias + 30}"> <small style="color:var(--danger)">Límite del Fondo: &lt;= ${fciData.vencimientoMaximoDias} días</small></div>
+              <div class="form-row"><label>Capital Invertido:</label><input type="text" value="$ 80.000.000,00"></div>
+              <button class="btn-action" style="background:var(--danger)" onclick="triggerSimulationAlert()">Simular Confirmación de Boleto</button>
+            </div>
+          </div>
+
+          <!-- MODAL EMERGENTE SIMULADO DE  -->
+          <div class="modal-alert" id="simAlertModal">
+            <div class="modal-alert-header">⚠️ AppFONDOS: ADVERTENCIA DE CONTROL EN LÍNEA</div>
+            <div class="modal-alert-body">
+              <strong>Fondo: ${fciData.numeroCNV} - ${fciData.nombre}</strong><br><br>
+              <span style="color:var(--danger); font-weight:bold;">• Límite Violado: Sobre Vencimiento de Activos</span><br>
+              Plazo pactado: <strong id="modalDiasText">${fciData.vencimientoMaximoDias + 30} Días</strong> | Límite Máximo: <strong>${fciData.vencimientoMaximoDias} Días</strong><br>
+              Exceso Detectado: <span style="color:var(--danger); font-weight:bold;">+30 Días sobre el tope de Reglamento de Gestión</span><br><br>
+              <em>El Administrador de Eventos ha registrado el incidente y bloqueado la confirmación directa del boleto.</em><br><br>
+              <button class="btn-action" onclick="document.getElementById('simAlertModal').style.display='none'">Cerrar Notificación</button>
+            </div>
+          </div>`;
+        break;
+
+      case 8:
+        panel.innerHTML = `
+          <div class="doc-callout">
+            <strong>Paso 8: Control Batch Diario & Semáforo de Estado</strong><br>
+            Ruta: <em>Límites > Control de Límites</em> (Manual , Sección 12.2). Evaluación global de cartera valorizada al cierre del VCP.
+          </div>
+          <div class="window-card">
+            <div class="window-header">
+              <span>🖥️ Límites > Control de Límites [Cierre Batch - Fondo ${fciData.numeroCNV}]</span>
+              <div class="win-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+            </div>
+            <div class="window-body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Estado</th>
+                    <th>Límite Evaluado</th>
+                    <th>Valor Cartera</th>
+                    <th>Valor Reglamento</th>
+                    <th>Desvío</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="badge badge-ok">🟢 CUMPLE</span></td>
+                    <td>Margen de Liquidez</td>
+                    <td>${fciData.margenLiquidezMin > 0 ? (fciData.margenLiquidezMin + 5.2).toFixed(2) + ' %' : 'N/A'}</td>
+                    <td>&gt;= ${fciData.margenLiquidezMin}.00 %</td>
+                    <td>${fciData.margenLiquidezMin > 0 ? '+ 5.20 %' : 'Sin piso'}</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge badge-ok">🟢 CUMPLE</span></td>
+                    <td>Activos a Devengamiento</td>
+                    <td>${(fciData.devengamientoMax * 0.8).toFixed(2)} %</td>
+                    <td>&lt;= ${fciData.devengamientoMax}.00 %</td>
+                    <td>En regla</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge badge-ok">🟢 CUMPLE</span></td>
+                    <td>Vencimiento Máximo Residual</td>
+                    <td>${Math.max(1, fciData.vencimientoMaximoDias - 15)} Días</td>
+                    <td>&lt;= ${fciData.vencimientoMaximoDias} Días</td>
+                    <td>En regla</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge badge-ok">🟢 CUMPLE</span></td>
+                    <td>Vida Promedio Ponderada (VPP)</td>
+                    <td>${Math.max(1, fciData.vidaPromedioMaxDias - 10)} Días</td>
+                    <td>&lt;= ${fciData.vidaPromedioMaxDias} Días</td>
+                    <td>En regla</td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge badge-ok">🟢 CUMPLE</span></td>
+                    <td>Oper. a Plazo en ${fciData.socDepositaria}</td>
+                    <td>0.00 %</td>
+                    <td>= 0.00 %</td>
+                    <td>Sin colocaciones</td>
+                  </tr>
+                </tbody>
+              </table>
+              <br>
+              <button class="btn-action" onclick="alert('Control Batch recalculado para ${fciData.nombre}. Cartera encuadrada.')">▶ Re-ejecutar Cierre Batch</button>
+            </div>
+          </div>`;
+        break;
+    }
+  }
+
+  function triggerSimulationAlert() {
+    const val = document.getElementById("simDias").value;
+    document.getElementById("modalDiasText").innerText = `${val} Días`;
+    document.getElementById("simAlertModal").style.display = "block";
+  }
+
+  // Inicializar estado vacío al abrir el archivo
+  setStep(1);
+</script>
+</body>
+</html>
